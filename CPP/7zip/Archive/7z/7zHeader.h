@@ -124,6 +124,10 @@ const UInt32 k_SPARC = 0x3030805;
 
 const UInt32 k_AES   = 0x6F10701;
 
+// external codecs (Tino Reichardt slot), DOC/Methods.txt
+const UInt32 k_ZSTD  = 0x04F71101;
+const UInt32 k_LZ4   = 0x04F71104;
+
 // const UInt32 k_ZSTD = 0x4015D; // winzip zstd
 // 0x4F71101, 7z-zstd
 

@@ -238,3 +238,4 @@ $(C_OBJS): ../../../../C/$(*B).c
 !ENDIF
 
 !include "Asm.mak"
+!include "Lz4Rules.mak"

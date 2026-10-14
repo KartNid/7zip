@@ -153,6 +153,7 @@ HRESULT CHandler::SetMainMethod(CCompressionMethodMode &methodMode)
       case k_Deflate: dicSize = (UInt32)1 << 15; break;
       case k_Deflate64: dicSize = (UInt32)1 << 16; break;
       case k_BZip2: dicSize = oneMethodInfo.Get_BZip2_BlockSize(); break;
+      case k_LZ4: dicSize = (UInt32)1 << 16; break;
       // case k_ZSTD: dicSize = 1 << 23; break;
       default: continue;
     }

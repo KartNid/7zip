@@ -81,6 +81,7 @@ AR_OBJS = \
   $O\IhexHandler.obj \
   $O\LpHandler.obj \
   $O\LzhHandler.obj \
+  $O\Lz4Handler.obj \
   $O\LzmaHandler.obj \
   $O\MachoHandler.obj \
   $O\MbrHandler.obj \
@@ -210,6 +211,9 @@ COMPRESS_OBJS = \
   $O\DeflateRegister.obj \
   $O\DeltaFilter.obj \
   $O\ImplodeDecoder.obj \
+  $O\Lz4Decoder.obj \
+  $O\Lz4Encoder.obj \
+  $O\Lz4Register.obj \
   $O\LzfseDecoder.obj \
   $O\LzhDecoder.obj \
   $O\Lzma2Decoder.obj \
@@ -303,6 +307,7 @@ C_OBJS = \
 !include "../../Aes.mak"
 !include "../../Crc.mak"
 !include "../../Crc64.mak"
+!include "../../Lz4.mak"
 !include "../../LzFindOpt.mak"
 !include "../../LzmaDec.mak"
 !include "../../Sha1.mak"
