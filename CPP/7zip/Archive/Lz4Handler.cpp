@@ -95,16 +95,24 @@ Z7_COM7F_IMF(CHandler::GetProperty(UInt32 /* index */, PROPID propID, PROPVARIAN
   return S_OK;
 }
 
-static const Byte kLz4Magic[4] = { 0x04, 0x22, 0x4D, 0x18 };
+// LZ4 frame magic 0x184D2204 and skippable-frame magics 0x184D2A50..0x184D2A5F
+static bool IsLz4Magic(const Byte *p)
+{
+  // real frame
+  if (p[0] == 0x04 && p[1] == 0x22 && p[2] == 0x4D && p[3] == 0x18)
+    return true;
+  // skippable frame (50..5F 2A 4D 18)
+  if (p[1] == 0x2A && p[2] == 0x4D && p[3] == 0x18
+      && p[0] >= 0x50 && p[0] <= 0x5F)
+    return true;
+  return false;
+}
 
 API_FUNC_static_IsArc IsArc_Lz4(const Byte *p, size_t size)
 {
   if (size < 4)
     return k_IsArc_Res_NEED_MORE;
-  for (unsigned i = 0; i < 4; i++)
-    if (p[i] != kLz4Magic[i])
-      return k_IsArc_Res_NO;
-  return k_IsArc_Res_YES;
+  return IsLz4Magic(p) ? k_IsArc_Res_YES : k_IsArc_Res_NO;
 }
 }
 
@@ -115,7 +123,7 @@ Z7_COM7F_IMF(CHandler::Open(IInStream *stream, const UInt64 *, IArchiveOpenCallb
   {
     Byte buf[4];
     RINOK(ReadStream_FALSE(stream, buf, 4))
-    if (IsArc_Lz4(buf, 4) == k_IsArc_Res_NO)
+    if (!IsLz4Magic(buf))
       return S_FALSE;
     _isArc = true;
     _stream = stream;
@@ -314,10 +322,31 @@ Z7_COM7F_IMF(CHandler::SetProperties(const wchar_t * const *names, const PROPVAR
   return _props.SetProperties(names, values, numProps);
 }
 
+// length-prefixed signatures: data-frame magic + skippable-frame magics 50..5F
+static const Byte k_Signatures[] = {
+  4, 0x04, 0x22, 0x4D, 0x18,
+  4, 0x50, 0x2A, 0x4D, 0x18,
+  4, 0x51, 0x2A, 0x4D, 0x18,
+  4, 0x52, 0x2A, 0x4D, 0x18,
+  4, 0x53, 0x2A, 0x4D, 0x18,
+  4, 0x54, 0x2A, 0x4D, 0x18,
+  4, 0x55, 0x2A, 0x4D, 0x18,
+  4, 0x56, 0x2A, 0x4D, 0x18,
+  4, 0x57, 0x2A, 0x4D, 0x18,
+  4, 0x58, 0x2A, 0x4D, 0x18,
+  4, 0x59, 0x2A, 0x4D, 0x18,
+  4, 0x5A, 0x2A, 0x4D, 0x18,
+  4, 0x5B, 0x2A, 0x4D, 0x18,
+  4, 0x5C, 0x2A, 0x4D, 0x18,
+  4, 0x5D, 0x2A, 0x4D, 0x18,
+  4, 0x5E, 0x2A, 0x4D, 0x18,
+  4, 0x5F, 0x2A, 0x4D, 0x18
+};
+
 REGISTER_ARC_IO(
   "lz4", "lz4 lz4l", "* .tar", 'l',
-  kLz4Magic, 0
-  , NArcInfoFlags::kKeepName
+  k_Signatures, 0
+  , NArcInfoFlags::kKeepName | NArcInfoFlags::kMultiSignature
   , 0
   , IsArc_Lz4)
 
