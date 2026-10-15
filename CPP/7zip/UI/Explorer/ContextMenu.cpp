@@ -25,6 +25,7 @@
 
 #include "../FileManager/FormatUtils.h"
 #include "../FileManager/LangUtils.h"
+#include "../FileManager/ProgramLocation.h"
 #include "../FileManager/PropertyName.h"
 
 #include "ContextMenu.h"
@@ -1186,7 +1187,7 @@ int CZipContextMenu::FindVerb(const UString &verb) const
 
 static UString Get7zFmPath()
 {
-  return fs2us(NWindows::NDLL::GetModuleDirPrefix()) + L"7zFM.exe";
+  return Get7zProgramPath(L"7zFM.exe");
 }
 
 

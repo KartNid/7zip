@@ -17,6 +17,7 @@
 #include "../../../Windows/ProcessUtils.h"
 #include "../../../Windows/Synchronization.h"
 
+#include "../FileManager/ProgramLocation.h"
 #include "../FileManager/RegistryUtils.h"
 
 #include "CompressCall.h"
@@ -76,8 +77,7 @@ static HRESULT Call7zGui(const UString &params,
     bool waitFinish,
     NSynchronization::CBaseEvent *event)
 {
-  UString imageName = fs2us(NWindows::NDLL::GetModuleDirPrefix());
-  imageName += k7zGui;
+  UString imageName = Get7zProgramPath(L"7zG.exe");
 
   CProcess process;
   const WRes wres = process.Create(imageName, params, NULL); // curDir);
