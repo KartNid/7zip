@@ -1,2 +1,2 @@
-*.dsp text eol=crlf
-*.dsw text eol=crlf
+# Keep vendored language resources byte-identical to the verified upstream files.
+Lang/* -text
