@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build standalone console
         working-directory: CPP/7zip/Bundles/Alone2
-        run: make -j2 -f ../../cmpl_gcc.mak
+        run: make -j2 -f ../../cmpl_gcc.mak O=_o
       - name: Install independent LZ4 implementation
         run: python3 -m pip install lz4
       - name: Test release binary
