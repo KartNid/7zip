@@ -1374,3 +1374,21 @@ predef: predef_cc predef_cxx
 
 clean:
 	-$(DEL_OBJ_EXE)
+
+# LZ4 codec, standalone frame handler, and vendored frame library.
+$O/Lz4Handler.o: ../../Archive/Lz4Handler.cpp
+	$(CXX) $(CXXFLAGS) $<
+$O/Lz4Decoder.o: ../../Compress/Lz4Decoder.cpp
+	$(CXX) $(CXXFLAGS) $<
+$O/Lz4Encoder.o: ../../Compress/Lz4Encoder.cpp
+	$(CXX) $(CXXFLAGS) $<
+$O/Lz4Register.o: ../../Compress/Lz4Register.cpp
+	$(CXX) $(CXXFLAGS) $<
+$O/lz4.o: ../../../../C/Lz4/lz4.c
+	$(CC) $(CFLAGS) -Wno-error $<
+$O/lz4hc.o: ../../../../C/Lz4/lz4hc.c
+	$(CC) $(CFLAGS) -Wno-error $<
+$O/lz4frame.o: ../../../../C/Lz4/lz4frame.c
+	$(CC) $(CFLAGS) -Wno-error $<
+$O/xxhash.o: ../../../../C/Lz4/xxhash.c
+	$(CC) $(CFLAGS) -Wno-error $<

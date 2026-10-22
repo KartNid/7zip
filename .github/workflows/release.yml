@@ -1,0 +1,107 @@
+name: Build and release LZ4
+
+on:
+  push:
+    branches: [main, 'codex/lz4-release']
+    tags: ['v*-lz4*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build standalone console
+        working-directory: CPP/7zip/Bundles/Alone2
+        run: make -j2 -f ../../cmpl_gcc.mak
+      - name: Install independent LZ4 implementation
+        run: python3 -m pip install lz4
+      - name: Test release binary
+        run: python3 tests/lz4_smoke.py CPP/7zip/Bundles/Alone2/_o/7zz --reference
+      - name: Package Linux x64
+        run: |
+          mkdir -p package/DOC dist
+          cp CPP/7zip/Bundles/Alone2/_o/7zz package/
+          cp DOC/License.txt DOC/copying.txt DOC/unRarLicense.txt DOC/readme.txt package/DOC/
+          cp C/Lz4/LICENSE-lz4.txt package/DOC/
+          cp docs/compose/spec/lz4-support.md package/DOC/
+          git rev-parse HEAD > package/SOURCE_COMMIT.txt
+          tar -C package -czf dist/7zip-26.05-lz4-linux-x64.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: dist/*
+          if-no-files-found: error
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Windows x64 suite
+        shell: cmd
+        run: |
+          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do call "%%i\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64
+          for %%d in (CPP\7zip\Bundles\Alone2 CPP\7zip\Bundles\Alone CPP\7zip\Bundles\Format7zF CPP\7zip\Bundles\Fm CPP\7zip\UI\GUI CPP\7zip\UI\Explorer) do (
+            pushd %%d
+            nmake /nologo PLATFORM=x64
+            if errorlevel 1 exit /b 1
+            popd
+          )
+      - name: Install independent LZ4 implementation
+        run: python -m pip install lz4
+      - name: Test standalone and DLL console binaries
+        run: |
+          python tests/lz4_smoke.py CPP/7zip/Bundles/Alone2/x64/7zz.exe --reference
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item CPP/7zip/Bundles/Format7zF/x64/7z.dll CPP/7zip/Bundles/Alone/x64/
+          python tests/lz4_smoke.py CPP/7zip/Bundles/Alone/x64/7z.exe --reference
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Package Windows x64
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force package/DOC, dist | Out-Null
+          Copy-Item CPP/7zip/Bundles/Alone2/x64/7zz.exe package/
+          Copy-Item CPP/7zip/Bundles/Alone/x64/7z.exe package/
+          Copy-Item CPP/7zip/Bundles/Format7zF/x64/7z.dll package/
+          Copy-Item CPP/7zip/Bundles/Fm/x64/7zFM.exe package/
+          Copy-Item CPP/7zip/UI/GUI/x64/7zG.exe package/
+          Copy-Item CPP/7zip/UI/Explorer/x64/7-zip.dll package/
+          Copy-Item DOC/License.txt, DOC/copying.txt, DOC/unRarLicense.txt, DOC/readme.txt package/DOC/
+          Copy-Item C/Lz4/LICENSE-lz4.txt package/DOC/
+          Copy-Item docs/compose/spec/lz4-support.md package/DOC/
+          git rev-parse HEAD | Set-Content package/SOURCE_COMMIT.txt
+          Compress-Archive -Path package/* -DestinationPath dist/7zip-26.05-lz4-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [linux, windows]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-x64'
+          merge-multiple: true
+          path: dist
+      - name: Create source archive and checksums
+        run: |
+          git archive --format=tar.gz --prefix=7zip-26.05-lz4/ HEAD > dist/7zip-26.05-lz4-source.tar.gz
+          cd dist
+          sha256sum *.tar.gz *.zip > SHA256SUMS.txt
+      - name: Publish tested release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/* --verify-tag --title "7-Zip 26.05 with LZ4" --notes-file docs/releases/26.05-lz4.md

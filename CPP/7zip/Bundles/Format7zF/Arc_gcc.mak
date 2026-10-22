@@ -118,6 +118,7 @@ AR_OBJS = \
   $O/IhexHandler.o \
   $O/LpHandler.o \
   $O/LzhHandler.o \
+  $O/Lz4Handler.o \
   $O/LzmaHandler.o \
   $O/MachoHandler.o \
   $O/MbrHandler.o \
@@ -255,6 +256,9 @@ COMPRESS_OBJS = \
   $O/DeflateRegister.o \
   $O/DeltaFilter.o \
   $O/ImplodeDecoder.o \
+  $O/Lz4Decoder.o \
+  $O/Lz4Encoder.o \
+  $O/Lz4Register.o \
   $O/LzfseDecoder.o \
   $O/LzhDecoder.o \
   $O/Lzma2Decoder.o \
@@ -368,6 +372,10 @@ C_OBJS = \
   $O/XzCrc64.o \
   $O/XzCrc64Opt.o \
   $O/ZstdDec.o \
+  $O/lz4.o \
+  $O/lz4hc.o \
+  $O/lz4frame.o \
+  $O/xxhash.o \
 
 ARC_OBJS = \
   $(LZMA_DEC_OPT_OBJS) \
