@@ -1,0 +1,12 @@
+26.05.2 / v26.05-lz4.2
+- Add all 93 official language resources to the repository and Windows ZIP/installer.
+- Add an English, Simplified Chinese, and Traditional Chinese Inno Setup installer.
+- Add optional native Explorer context-menu integration and LZ4 Open with registration.
+- Register actual installation paths for 7zFM.exe, 7zG.exe, and the native shell extension.
+- Preserve native .lz4/.lz4l association entries and all seven LZ4-enabled binaries.
+- Keep Explorer running during upgrades; defer locked-file replacement until reboot.
+- Add automated language, custom-directory installation, shell-command, and uninstall checks.
+
+26.05.1 / v26.05-lz4.1
+- Merge lz4-support into main on top of upstream 26.05.
+- Publish tested Windows x64 and Linux x64 portable builds with source and checksums.

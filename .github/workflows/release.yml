@@ -2,7 +2,7 @@ name: Build and release LZ4
 
 on:
   push:
-    branches: [main, 'codex/lz4-release']
+    branches: [main, 'codex/lz4-release', 'codex/multilingual-installer']
     tags: ['v*-lz4*']
   workflow_dispatch:
 
@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - name: Verify multilingual resources
+        run: python3 tests/check_languages.py
       - name: Build standalone console
         working-directory: CPP/7zip/Bundles/Alone2
         run: make -j2 -f ../../cmpl_gcc.mak O=_o
@@ -28,8 +30,10 @@ jobs:
           cp DOC/License.txt DOC/copying.txt DOC/unRarLicense.txt DOC/readme.txt package/DOC/
           cp C/Lz4/LICENSE-lz4.txt package/DOC/
           cp docs/compose/spec/lz4-support.md package/DOC/
+          cp CHANGELOG.txt package/
           git rev-parse HEAD > package/SOURCE_COMMIT.txt
-          tar -C package -czf dist/7zip-26.05-lz4-linux-x64.tar.gz .
+          version=$(cat packaging/version.txt)
+          tar -C package -czf "dist/7zip-$version-lz4-linux-x64.tar.gz" .
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
@@ -40,6 +44,8 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+      - name: Verify multilingual resources
+        run: python tests/check_languages.py
       - name: Build Windows x64 suite
         shell: cmd
         run: |
@@ -63,20 +69,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Package Windows x64
         shell: pwsh
+        run: ./packaging/windows/package.ps1
+      - name: Build multilingual Windows installer
+        shell: pwsh
+        run: ./packaging/windows/build-installer.ps1 -PackageDir package -DistDir dist
+      - name: Test install, live languages, native context menu, upgrade, and uninstall
+        shell: powershell
         run: |
-          New-Item -ItemType Directory -Force package/DOC, dist | Out-Null
-          Copy-Item CPP/7zip/Bundles/Alone2/x64/7zz.exe package/
-          Copy-Item CPP/7zip/Bundles/Alone/x64/7za.exe package/
-          Copy-Item CPP/7zip/UI/Console/x64/7z.exe package/
-          Copy-Item CPP/7zip/Bundles/Format7zF/x64/7z.dll package/
-          Copy-Item CPP/7zip/Bundles/Fm/x64/7zFM.exe package/
-          Copy-Item CPP/7zip/UI/GUI/x64/7zG.exe package/
-          Copy-Item CPP/7zip/UI/Explorer/x64/7-zip.dll package/
-          Copy-Item DOC/License.txt, DOC/copying.txt, DOC/unRarLicense.txt, DOC/readme.txt package/DOC/
-          Copy-Item C/Lz4/LICENSE-lz4.txt package/DOC/
-          Copy-Item docs/compose/spec/lz4-support.md package/DOC/
-          git rev-parse HEAD | Set-Content package/SOURCE_COMMIT.txt
-          Compress-Archive -Path package/* -DestinationPath dist/7zip-26.05-lz4-windows-x64.zip
+          $version = (Get-Content packaging/version.txt -Raw).Trim()
+          ./tests/windows_install.ps1 -Installer "dist/7z-lz4-$version-x64-setup.exe"
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x64
@@ -98,13 +99,14 @@ jobs:
           path: dist
       - name: Create source archive and checksums
         run: |
-          git archive --format=tar.gz --prefix=7zip-26.05-lz4/ HEAD > dist/7zip-26.05-lz4-source.tar.gz
+          version=$(cat packaging/version.txt)
+          git archive --format=tar.gz --prefix="7zip-$version-lz4/" HEAD > "dist/7zip-$version-lz4-source.tar.gz"
           cd dist
-          sha256sum *.tar.gz *.zip > SHA256SUMS.txt
+          sha256sum *.tar.gz *.zip *.exe > SHA256SUMS.txt
       - name: Publish tested release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$RELEASE_TAG" dist/* --verify-tag --title "7-Zip 26.05 with LZ4" --notes-file docs/releases/26.05-lz4.md
+          gh release create "$RELEASE_TAG" dist/* --verify-tag --title "7-Zip LZ4 26.05.2 — Multilingual installer" --notes-file docs/releases/26.05-lz4.md
