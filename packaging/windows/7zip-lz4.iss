@@ -38,8 +38,8 @@ VersionInfoVersion={#AppVersion}.0
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"
-Name: "zhcn"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
-Name: "zhtw"; MessagesFile: "compiler:Languages\ChineseTraditional.isl"
+Name: "zhcn"; MessagesFile: "Languages\ChineseSimplified.isl"
+Name: "zhtw"; MessagesFile: "Languages\ChineseTraditional.isl"
 
 [CustomMessages]
 en.Options=Additional options:
@@ -171,8 +171,7 @@ end;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin
-  if CurPageID = wpWelcome then begin
-    ShowWindow(WizardForm.Handle, 9);
-    SetForegroundWindow(WizardForm.Handle);
-  end;
+  // Also restore the first visible page when the welcome page is skipped.
+  ShowWindow(WizardForm.Handle, 9);
+  SetForegroundWindow(WizardForm.Handle);
 end;
