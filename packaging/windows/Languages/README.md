@@ -4,7 +4,7 @@ Wizard translations are from the Inno Setup 6.7.0 source tag:
 - https://github.com/jrsoftware/issrc/blob/is-6_7_0/Files/Languages/Unofficial/ChineseTraditional.isl
 
 Original translator credits are retained. The files are saved as UTF-8 with BOM
-for consistent Chinese decoding. Their untranslated upstream SHA-256 values
+for consistent Chinese decoding. Their original upstream SHA-256 values
 before UTF-8 BOM/line-ending normalization were:
 
 ```

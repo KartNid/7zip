@@ -73,8 +73,8 @@ Name: "{autodesktop}\7-Zip LZ4"; Filename: "{app}\7zFM.exe"; Tasks: desktopicon
 Root: HKLM; Subkey: "Software\Classes\SevenZipLZ4"; ValueType: string; ValueData: "LZ4 archive"; Tasks: associations; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\Classes\SevenZipLZ4\DefaultIcon"; ValueType: string; ValueData: """{app}\7zFM.exe"",0"; Tasks: associations
 Root: HKLM; Subkey: "Software\Classes\SevenZipLZ4\shell\open\command"; ValueType: string; ValueData: """{app}\7zFM.exe"" ""%1"""; Tasks: associations
-Root: HKLM; Subkey: "Software\Classes\.lz4\OpenWithProgids"; ValueType: none; ValueName: "SevenZipLZ4"; Tasks: associations; Flags: uninsdeletevalue
-Root: HKLM; Subkey: "Software\Classes\.lz4l\OpenWithProgids"; ValueType: none; ValueName: "SevenZipLZ4"; Tasks: associations; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "Software\Classes\.lz4\OpenWithProgids"; ValueType: string; ValueName: "SevenZipLZ4"; ValueData: ""; Tasks: associations; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "Software\Classes\.lz4l\OpenWithProgids"; ValueType: string; ValueName: "SevenZipLZ4"; ValueData: ""; Tasks: associations; Flags: uninsdeletevalue
 
 [Code]
 const
